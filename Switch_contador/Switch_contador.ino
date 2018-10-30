@@ -23,12 +23,12 @@ int pos3 = 5; //variable de poscion del cuarto switch ------control de luces
 int pulsa = 6; //variable de poscion del pulsador  ------control de contador
 int  i = 0; //variable de recorrido del vector
 int control = 0; //variable que permitira cintrolar los swtichs
-int a = 0;
-int b = 0;
-int c = 0;
-int d = 0;
-int e = 0;
-int f = 0;
+int a = 0;//varaiable de acarreo para el contador primer bit
+int b = 0;//varaiable de acarreo para el contador segundo bit
+int c = 0;//varaiable de acarreo para el contador tercer bit
+int d = 0;//varaiable de acarreo para el contador cuarto bit
+int e = 0;//varaiable de acarreo para el contador quinto bit
+int f = 0;//varaiable de acarreo para el contador sexto bit
 int btn = 7;
 void setup() {
   for (; i < 6; i++) //configuracion de pines de forma grupal
