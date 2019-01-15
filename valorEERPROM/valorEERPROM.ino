@@ -28,7 +28,7 @@ void ingreso() {
       break;
     case 1:
       funS++;//aumento de la variable contador
-      Serial.println("lectura de datos");//impresion de mensaje 
+      Serial.println("Datos Ingresados");//impresion de mensaje 
       break;
     case 2:
       funS++;//aumento de la variable contador
