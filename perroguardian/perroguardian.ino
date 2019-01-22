@@ -24,21 +24,21 @@
 #include <MsTimer2.h>
 #include <LiquidCrystal.h>//librerá de pantalla lcd
 LiquidCrystal LCD(3, 4, 5, 6, 7, 8); //pines de habilitacion RS,E,D4,D5,D6,D7
-float valvol;
-int cont ;
-int resp = 0;
-int funS;
-int est;
-int act;
-String str;
-void control() {
-
+float valvol;//variable que guarda el valor del voltaje 
+int cont ;//variable para contador 
+int resp = 0;//variable de control
+int funS;//variable de interrupcion 
+int est;//variable de control
+int act;//variable de control
+String str;//variable que guarda el valor del tiempo ingresado 
+void control() {//****************************************************************************************************
+//interrupcion que controla el sistema 
   switch (funS)//interrupcion
   { case 0://condicion 0
       Serial.println("BIENVENIDO ");//impresion de mensaje
       funS++;//aumento de la variable contador
-      act = 0;
-      est = 0;
+      act = 0;//reseteo de las variables 
+      est = 0;//reseteo de las variables 
       break;
     case 1:
       funS++;//aumento de la variable contador
@@ -49,116 +49,131 @@ void control() {
       Serial.println("LECTURA DE DATOS ");//impresion de mensaje
       break;
     case 4 :
-      if (str.length() == 0)
+      if (str.length() == 0)//se valida que se ingrese un valor 
       {
-        Serial.println("valor no valido");
-        funS = 0;
+        Serial.println("valor no valido");//impresion de mensaje
+        funS = 0;//se regresa al inicio 
       }
-      Serial.println("INICIO DGW");
+      Serial.println("INICIO DGW");//impresion de mensaje
       break;
     case 5:
       break;
   }
 }
-void reset ()
-{ valvol = (analogRead(0) * 5.0) / 1023.0;
-  LCD.setCursor(5, 1);
-  LCD.print(valvol);
- if (valvol < 2.5)
-    { switch (act)
-      {
-        case 1:
-          Serial.println("ALERTA");
-          EEPROM.write(0, valvol);
-          wdt_enable(WDTO_1S);
-          break;
-        case 2:
-          Serial.println("ALERTA");
-          EEPROM.write(0, valvol);
-          wdt_enable(WDTO_2S);
-          Serial.println("ddddddddddddddddd");
-          break;
-        case 3:
-          Serial.println("ALERTA");
-          EEPROM.write(0, valvol);
-          wdt_enable(WDTO_4S);
-          break;
-        case 4:
-          Serial.println("ALERTA");
-          EEPROM.write(0, valvol);
-          wdt_enable(WDTO_8S);
-          break;
-      }
+void reset ()//*************************************************************************************************
+{ valvol = (analogRead(0) * 5.0) / 1023.0;//CAD
+  LCD.setCursor(5, 1);//impresion en LCD
+  LCD.print(valvol);//impresion en LCD
+  if (valvol < 3)//se toma en cuenta un valor minimo 
+  { switch (act)//la variable de control que se asigna en base a los valores ingresados 
+    {
+      case 1:
+        Serial.println("ALERTA");//impresion en LCD
+        EEPROM.write(0, valvol);//impresion en LCD
+        if (cont == 2) {//el contador controla el WTD
+          wdt_enable(WDTO_8S);//inicio de WTD
+          cont = 0;//reseteo de contador 
+        }
 
-    } else {
-      LCD.clear();
-      LCD.setCursor(5, 1);
-      LCD.print("SIN PROBM");
+        break;
+      case 2:
+        Serial.println("ALERTA");//impresion en LCD
+        EEPROM.write(0, valvol);//impresion en LCD
+        if (cont == 12) {//el contador controla el WTD
+          wdt_enable(WDTO_8S);//inicio de WTD
+          cont = 0;//reseteo de contador
+        }
+        break;
+      case 3:
+        Serial.println("ALERTA");//impresion en LCD
+        EEPROM.write(0, valvol);//impresion en LCD
+        if (cont == 22) {//el contador controla el WTD
+          wdt_enable(WDTO_8S);//inicio de WTD
+          cont = 0;//reseteo de contador
+        }
+        break;
+      case 4:
+        Serial.println("ALERTA");//impresion en LCD
+        EEPROM.write(0, valvol);//impresion en LCD
+        if (cont == 32) {//el contador controla el WTD
+          wdt_enable(WDTO_8S);//inicio de WTD
+          cont = 0;//reseteo de contador
+        }
+        break;
     }
-  
+
+  } else {
+    LCD.clear();//limieza de LCD
+    LCD.setCursor(8, 1);//impresion en LCD
+    LCD.print("SIN PROBM");//impresion en LCD
+  }
+
 
 }
 void setup() {
-  cont = EEPROM.read(0);
   LCD.begin(16, 2); //inicializar lcd
-  LCD.setCursor(0, 0);
-  Serial.begin(9600);
-  MsTimer2::set(5000, reset);
-  MsTimer2::start();
-  Serial.println("RESET");
+  LCD.setCursor(0, 0);////impresion en LCD
+  Serial.begin(9600);//inicio de CX
+  MsTimer2::set(5000, reset);//inicializacion de timer
+  MsTimer2::start();//inicio de timer 
+  Serial.println("RESET");//impresion de mensaje 
   attachInterrupt(0, control, FALLING); //interrupcion de sistema para control general
 
 }
 
 void loop() {
-  cont++;
-  delay(500);
-    if (est == 1)
-  {}
-  if (funS == 2)
+
+  if (funS == 2)//ingreso de datos 
   { if (Serial.available() > 0) {//comprobaciond de C.x
       str = Serial.readString();//Recibe en caracteres//ingreso de la cadena
 
-      funS = 4;
+      funS = 4;//se cambia la variable de interrupcion 
     }
   }
-  if (funS == 4)
-  { est = 1;
-    if (str.toInt() == 10 || str.toInt() == 20 || str.toInt() == 30 || str.toInt() == 40)
-    { switch (str.toInt())
+  if (funS == 4)//lectura de los datos ingresados 
+  { est = 1;//se cambia una variable de estado
+    if (str.toInt() == 10 || str.toInt() == 20 || str.toInt() == 30 || str.toInt() == 40)//se valida los valores ingresados 
+    { switch (str.toInt())//se toma el valor ingresado 
       {
-        case 10:
-          act = 1;
-          LCD.setCursor(0, 0);
-          LCD.print("DGW");
-          LCD.setCursor(6, 0);
-          LCD.print(str);
+        case 10://para cuando sean 10 s
+          cont++;//inicio de contador 
+          delay(500);//retraso del sistema 
+          act = 1;//asignacion de variable de control 
+          LCD.setCursor(0, 0);//impresion en LCD
+          LCD.print("DGW");//impresion en LCD
+          LCD.setCursor(6, 0);//impresion en LCD
+          LCD.print(str);//impresion en LCD
           break;
-        case 20:
-          act = 2;
-          LCD.setCursor(0, 0);
-          LCD.print("DGW");
-          LCD.setCursor(6, 0);
-          LCD.print(str);
+        case 20://para cuando sean 20 s
+          cont++;//inicio de contador 
+          delay(500);//retraso del sistema 
+          act = 2;//asignacion de variable de control 
+          LCD.setCursor(0, 0);//impresion en LCD
+          LCD.print("DGW");//impresion en LCD
+          LCD.setCursor(6, 0);//impresion en LCD
+          LCD.print(str);//impresion en LCD
           break;
-        case 30:
-          act = 3;
-          LCD.setCursor(0, 0);
-          LCD.print("DGW");
-          LCD.setCursor(6, 0);
-          LCD.print(str);
+        case 30://para cuando sean 30 s
+          cont++;//inicio de contador 
+          delay(500);//retraso del sistema 
+          act = 3;//asignacion de variable de control 
+          LCD.setCursor(0, 0);//impresion en LCD
+          LCD.print("DGW");//impresion en LCD
+          LCD.setCursor(6, 0);//impresion en LCD
+          LCD.print(str);//impresion en LCD
           break;
-        case 40:
-          act = 4;
-          LCD.setCursor(0, 0);
-          LCD.print("DGW");
-          LCD.setCursor(6, 0);
-          LCD.print(str);
+        case 40://para cuando sean 40 s
+          act = 4;//asignacion de variable de control 
+          cont++;//inicio de contador 
+          delay(500);//retraso del sistema 
+          LCD.setCursor(0, 0);//impresion en LCD
+          LCD.print("DGW");//impresion en LCD
+          LCD.setCursor(6, 0);//impresion en LCD
+          LCD.print(str);//impresion en LCD
           break;
       }
 
     }
   }
-  //Serial.println(cont);
 
 }
