@@ -122,6 +122,7 @@ void setup() {
   MsTimer2::start();//inicio de timer
   Serial.println("RESET");//impresion de mensaje
   attachInterrupt(0, control, FALLING); //interrupcion de sistema para control general
+  wdt_disable();
 
 }
 
